@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from libvirt import VIR_DOMAIN_XML_SECURE
 from webvirtcloud.settings import QEMU_CONSOLE_LISTENER_ADDRESSES
 
+from instances.storages import get_replay_storage
 from computes.models import Compute
 from vrtManager.instance import wvmInstance
 
@@ -268,3 +269,13 @@ class PermissionSet(models.Model):
         ]
 
         managed = False
+
+
+class Replay(models.Model):
+    instance = models.ForeignKey(Instance, related_name="replays", on_delete=models.CASCADE)
+    name = models.CharField(_('name'), max_length=120)
+    log_file = models.FileField(_('log file'), storage=get_replay_storage())
+    created = models.DateTimeField(_('created'), auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created']
