@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from appsettings.models import AppSettings
 from webvirtcloud.settings import QEMU_CONSOLE_LISTENER_ADDRESSES, QEMU_KEYMAPS
 
-from .models import CreateInstance, Flavor
+from .models import CreateInstance, Flavor, Replay
 
 
 class FlavorForm(forms.ModelForm):
@@ -66,3 +66,9 @@ class NewVMForm(forms.ModelForm):
         if not have_symbol:
             raise forms.ValidationError(_('The name of the virtual machine must not contain any special characters'))
         return name
+
+
+class ReplayForm(forms.ModelForm):
+    class Meta:
+        model = Replay
+        fields = ['name']

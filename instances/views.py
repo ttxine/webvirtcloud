@@ -31,8 +31,9 @@ from vrtManager.storage import wvmStorage
 from vrtManager.util import randomPasswd
 
 from . import utils
-from .forms import ConsoleForm, FlavorForm, NewVMForm
-from .models import Flavor
+from .forms import ConsoleForm, FlavorForm, NewVMForm, ReplayForm
+from .models import Flavor, Replay
+from .storages import get_replay_storage
 
 
 def index(request):
@@ -846,6 +847,55 @@ def revert_snapshot(request, pk):
         msg = _("Revert snapshot: %(snap)s") % {"snap": snap_name}
         addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
     return redirect(request.META.get("HTTP_REFERER") + "#managesnapshot")
+
+
+def record(request, pk):
+    instance = get_instance(request.user, pk)
+    if instance.is_template:
+        messages.warning(request, _("Templates cannot be recorded."))
+    else:
+        form = ReplayForm(request.POST or None)
+        if form.is_valid():
+            replay = form.save(commit=False)
+            replay.instance = instance
+
+            log_file = "%(name)s.replay" % {"name": replay.name}
+            log_file = get_replay_storage().get_available_name(log_file, 120)
+            path = get_replay_storage().path(log_file)
+            instance.proxy.record(instance.name, path)
+            replay.log_file = log_file
+
+            replay.save()
+            msg = _("Record %(id)s") % {"id": replay.id}
+            addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
+
+    return redirect(request.META.get("HTTP_REFERER"))
+
+
+def replay(request, pk):
+    instance = get_instance(request.user, pk)
+    replay_id = request.POST.get("id")
+
+    if instance.is_template:
+        messages.warning(request, _("Templates cannot be replayed."))
+    else:
+        replay = Replay.objects.get(id=replay_id)
+        instance.proxy.replay(instance.name, replay.log_file.path)
+        msg = _("Replay: %(id)s") % {"id": replay.id}
+        addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
+
+    return redirect(request.META.get("HTTP_REFERER"))
+
+
+def delete_replay(request, pk):
+    instance = get_instance(request.user, pk)
+    replay_id = request.POST.get("id")
+    replay = Replay.objects.get(id=replay_id)
+    get_replay_storage().delete(replay.log_file.name)
+    replay.delete()
+    msg = _("Delete replay: %(id)s") % {"id": replay.id}
+    addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 @superuser_only
