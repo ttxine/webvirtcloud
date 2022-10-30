@@ -1263,6 +1263,14 @@ class wvmInstance(wvmConnect):
     def get_managed_save_image(self):
         return self.instance.hasManagedSaveImage(0)
 
+    def record(self, name, path):
+        dom = self.get_instance(name)
+        dom.record(path)
+
+    def replay(self, name, path):
+        dom = self.get_instance(name)
+        dom.replay(path)
+
     def get_wvmStorage(self, pool):
         return wvmStorage(self.host, self.login, self.passwd, self.conn, pool)
 
