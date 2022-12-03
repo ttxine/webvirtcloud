@@ -276,6 +276,7 @@ class Replay(models.Model):
     name = models.CharField(_('name'), max_length=120)
     log_file = models.FileField(_('log file'), storage=get_replay_storage())
     created = models.DateTimeField(_('created'), auto_now_add=True)
+    snapshot = models.CharField(_('snapshot'), max_length=14, blank=True)
 
     class Meta:
         ordering = ['-created']

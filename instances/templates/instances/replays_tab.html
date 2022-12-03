@@ -27,6 +27,13 @@
                             <input type="text" class="form-control form-control-lg" name="name" placeholder="{% trans "Replay name" %}" required>
                             <input type="submit" class="btn btn-lg btn-success float-end" name="record" value="{% trans "Record" %}">
                         </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="take_snapshot" id="id_take_snapshot" onclick="$('#id_snapshot').prop('disabled', !this.checked)">
+                            <label class="form-check-label" for="id_take_snapshot">{% trans "Take snapshot" %}</label>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control form-control-lg" name="snapshot" id="id_snapshot" placeholder="{% trans "Snapshot Name" %}" maxlength="14" required disabled>
+                        </div>
                 </form>
             {% endif %}
             <div class="clearfix"></div>
@@ -40,6 +47,7 @@
                             <th scope="col">{% trans "Name" %}</th>
                             <th scope="col">{% trans "Log File" %}</th>
                             <th scope="col">{% trans "Date" %}</th>
+                            <th scope="col">{% trans "Snapshot" %}</th>
                             <th scope="colgroup" colspan="2">{% trans "Action" %}</th>
                         </thead>
                         <tbody>
@@ -48,6 +56,7 @@
                                 <td><strong>{{ replay.name }}</strong></td>
                                 <td>{{ replay.log_file.name }}</td>
                                 <td>{{ replay.created|date:"M d H:i:s" }}</td>
+                                <td>{{ replay.snapshot }}</td>
                                 <td style="width:30px;">
                                     <form action="{% url 'instances:replay' instance.id %}" method="post" role="form" aria-label="Replay form">
                                         {% csrf_token %}

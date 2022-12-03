@@ -862,7 +862,12 @@ def record(request, pk):
             log_file = "%(name)s.replay" % {"name": replay.name}
             log_file = get_replay_storage().get_available_name(log_file, 120)
             path = get_replay_storage().path(log_file)
-            instance.proxy.record(instance.name, path)
+
+            if replay.snapshot:
+                instance.proxy.record_with_snapshot(instance.name, path, replay.snapshot)
+            else:
+                instance.proxy.record(instance.name, path)
+
             replay.log_file = log_file
 
             replay.save()
@@ -880,7 +885,12 @@ def replay(request, pk):
         messages.warning(request, _("Templates cannot be replayed."))
     else:
         replay = Replay.objects.get(id=replay_id)
-        instance.proxy.replay(instance.name, replay.log_file.path)
+
+        if replay.snapshot:
+            instance.proxy.snapshot_revert(replay.snapshot)
+        else:
+            instance.proxy.replay(instance.name, replay.log_file.path)
+
         msg = _("Replay: %(id)s") % {"id": replay.id}
         addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
 

@@ -43,6 +43,7 @@
                             <th scope="col">{% trans "Date" %}</th>
                             <th scope="col">{% trans "Name" %}</th>
                             <th scope="col">{% trans "Description" %}</th>
+                            <th scope="col">{% trans "Replay file" %}</th>
                             <th scope="colgroup" colspan="2">{% trans "Action" %}</th>
                         </thead>
                         <tbody>
@@ -51,6 +52,7 @@
                                 <td>{{ snap.date|date:"M d H:i:s" }}</td>
                                 <td><strong>{{ snap.name }}</strong></td>
                                 <td>{{ snap.description }}</td>
+                                <td>{{ snap.replayfile }}</td>
                                 <td style="width:30px;">
                                     <form action="{% url 'instances:revert_snapshot' instance.id %}" method="post" role="form" aria-label="Restore snapshot form">
                                         {% csrf_token %}

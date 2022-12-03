@@ -1241,11 +1241,13 @@ class wvmInstance(wvmConnect):
             snap = self.instance.snapshotLookupByName(snapshot, 0)
             snap_description = util.get_xml_path(snap.getXMLDesc(0), "/domainsnapshot/description")
             snap_time_create = util.get_xml_path(snap.getXMLDesc(0), "/domainsnapshot/creationTime")
+            snap_replayfile = util.get_xml_path(snap.getXMLDesc(0), "/domainsnapshot/replayfile")
             snapshots.append(
                 {
                     "date": datetime.fromtimestamp(int(snap_time_create)),
                     "name": snapshot,
                     "description": snap_description,
+                    "replayfile": os.path.basename(snap_replayfile) if snap_replayfile else None,
                 }
             )
         return snapshots
@@ -1270,6 +1272,10 @@ class wvmInstance(wvmConnect):
     def replay(self, name, path):
         dom = self.get_instance(name)
         dom.replay(path)
+
+    def record_with_snapshot(self, name, path, snapshot):
+        dom = self.get_instance(name)
+        dom.recordWithSnapshot(path, snapshot)
 
     def get_wvmStorage(self, pool):
         return wvmStorage(self.host, self.login, self.passwd, self.conn, pool)

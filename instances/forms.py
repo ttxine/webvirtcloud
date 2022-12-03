@@ -71,4 +71,4 @@ class NewVMForm(forms.ModelForm):
 class ReplayForm(forms.ModelForm):
     class Meta:
         model = Replay
-        fields = ['name']
+        fields = ['name', 'snapshot']
