@@ -842,6 +842,18 @@ class wvmConnect(object):
                 instance.append(dom.name())
         return instance
 
+    def get_replays(self):
+        instance = []
+        for rep_id in self.wvm.listDomainsID():
+            dom = self.wvm.lookupByID(int(rep_id))
+            if dom.replayNum(0) != 0:
+                instance.append(dom.name())
+        for name in self.wvm.listDefinedDomains():
+            dom = self.wvm.lookupByName(name)
+            if dom.replayNum(0) != 0:
+                instance.append(dom.name())
+        return instance
+
     def get_net_devices(self):
         netdevice = []
 

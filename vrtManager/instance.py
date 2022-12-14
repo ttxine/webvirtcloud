@@ -1313,6 +1313,50 @@ class wvmInstance(wvmConnect):
         self.instance.revertToSnapshot(snap, 0)
         self.recover_snapshot_xml()
 
+    def _replayCreateXML(self, xml, flag):
+        self.instance.replayCreateXML(xml, flag)
+
+    def create_replay(self, name, path, desc=None):
+        xml = """<domainreplay>
+                     <name>%s</name>
+                     <description>%s</description>
+                     <creationTime>%d</creationTime>
+                     <path>%s</path>
+                 </domainreplay>""" % (
+            name,
+            desc,
+            time.time(),
+            path
+        )
+        self._replayCreateXML(xml, 0)
+
+    def get_replay(self):
+        replays = []
+        replay_list = self.instance.listAllReplays(0)
+        for replay in replay_list:
+            replay_description = util.get_xml_path(
+                replay.getXMLDesc(0), "/domainreplay/description"
+            )
+            replay_time_create = util.get_xml_path(
+                replay.getXMLDesc(0), "/domainreplay/creationTime"
+            )
+            replays.append(
+                {
+                    "date": datetime.fromtimestamp(int(replay_time_create)),
+                    "name": replay.getName(),
+                    "description": replay_description,
+                }
+            )
+        return replays
+
+    def replay_delete(self, replay):
+        rep = self.instance.replayLookupByName(replay, 0)
+        rep.delete(0)
+
+    def replay_start(self, replay):
+        rep = self.instance.replayLookupByName(replay, 0)
+        self.instance.startReplay(rep, 0)
+
     def get_managed_save_image(self):
         return self.instance.hasManagedSaveImage(0)
 
