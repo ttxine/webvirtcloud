@@ -102,6 +102,12 @@
             </li>
             {% endif %}
             <li class="nav-item" role="presentation">
+                <button class="nav-link action-button" id="replays-tab" aria-controls="replays" data-bs-toggle="pill" data-bs-target="#replays" type="button" role="tab" aria-selected="false">
+                    <span id="action-block" class="fa fa-video-camera" aria-hidden="true"></span>
+                    {% trans "Replay" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link action-button" id="settings-tab" aria-controls="settings" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab" aria-selected="false">
                     <span id="action-block" class="fa fa-cog" aria-hidden="true"></span>
                     {% trans "Settings" %}
@@ -126,6 +132,7 @@
             {% include 'instances/access_tab.html' %}
             {% include 'instances/resize_tab.html' %}
             {% include 'instances/snapshots_tab.html' %}
+            {% include 'instances/replays_tab.html' %}
             {% include 'instances/settings_tab.html' %}
             {% include 'instances/stats_tab.html' %}
             {% include 'instances/destroy_tab.html' %}

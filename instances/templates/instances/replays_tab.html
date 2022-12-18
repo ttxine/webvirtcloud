@@ -1,0 +1,94 @@
+{% load i18n %}
+{% load icons %}
+<div class="tab-pane" id="replays" role="tabpanel">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist" aria-label="Instance record/replay menu">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#record" type="button" role="tab" aria-controls="record" aria-selected="true">
+                {% trans "Record" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#managereplay" type="button" role="tab" aria-controls="managereplay" aria-selected="false">
+                {% trans "Manage Replays" %}
+            </button>
+        </li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane tab-pane-bordered active" id="record">
+            {% if instance.status != 5 %}
+                <p class="text-danger">{% trans "Domain is already running" %}</p>
+            {% else %}
+                <p>{% trans "Record instance execution" %}</p>
+                <form action="{% url 'instances:record' instance.id %}" method="post" role="form" aria-label="Record form">
+                    {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-lg" name="name" placeholder="{% trans "Replay name" %}" required>
+                            <span class="input-group-text">|</span>
+                            <input type="text" class="form-control form-control-lg" name="description" placeholder="{% trans "Replay Description" %}" maxlength="45">
+                            <input type="submit" class="btn btn-lg btn-success float-end" name="record" value="{% trans "Record" %}">
+                        </div>
+                </form>
+            {% endif %}
+            <div class="clearfix"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane tab-pane-bordered" id="managereplay">
+            {% if instance.replays %}
+                <p>{% trans "Choose a replay for execution" %}</p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <th scope="col">{% trans "Date" %}</th>
+                            <th scope="col">{% trans "Name" %}</th>
+                            <th scope="col">{% trans "Description" %}</th>
+                            <th scope="colgroup" colspan="2">{% trans "Action" %}</th>
+                        </thead>
+                        <tbody>
+                        {% for replay in instance.replays %}
+                            <tr>
+                                <td>{{ replay.date|date:"M d H:i:s" }}</td>
+                                <td><strong>{{ replay.name }}</strong></td>
+                                <td>{{ replay.description }}</td>
+                                <td style="width:30px;">
+                                    <form action="{% url 'instances:start_replay' instance.id %}" method="post" role="form" aria-label="Replay form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="name" value="{{ replay.name }}">
+                                        {% if instance.status == 5 %}
+                                            <button type="submit" class="btn btn-sm btn-secondary" name="replay" title="{% trans 'Replay' %}">
+                                                    <span class="fa fa-play"></span>
+                                            </button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-secondary disabled"
+                                                    title="{% trans "To replay VM execution you need Power Off the instance." %}">
+                                                    <span class="fa fa-play"></span>
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                <td style="width:30px;">
+                                    <form action="{% url 'instances:delete_replay' instance.id %}" method="post" role="form" aria-label="Delete replay form">{% csrf_token %}
+                                        <input type="hidden" name="name" value="{{ replay.name }}">
+                                        {% if instance.status == 5 %}
+                                            <button type="submit" class="btn btn-sm btn-danger" title="{% trans 'Delete Replay' %}" onclick="return confirm('{% trans "Are you sure?" %}')">
+                                                {% icon 'trash' %}
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-sm btn-danger disabled"
+                                                    title="{% trans 'To delete replay you need Power Off the instance.' %}">
+                                                    {% icon 'trash' %}
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>{% trans "You do not have any replays" %}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

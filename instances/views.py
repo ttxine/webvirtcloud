@@ -22,6 +22,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from libvirt import (VIR_DOMAIN_UNDEFINE_KEEP_NVRAM, VIR_DOMAIN_UNDEFINE_NVRAM,
                      libvirtError)
+from instances.storages import get_replay_storage
 from logs.views import addlogmsg
 from vrtManager import util
 from vrtManager.create import wvmCreate
@@ -1013,6 +1014,54 @@ def revert_snapshot(request, pk):
         msg = _("Revert snapshot: %(snap)s") % {"snap": snap_name}
         addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
     return redirect(request.META.get("HTTP_REFERER") + "#managesnapshot")
+
+
+def record(request, pk):
+    instance = get_instance(request.user, pk)
+    allow_admin_or_not_template = (
+        request.user.is_superuser or request.user.is_staff or not instance.is_template
+    )
+
+    if allow_admin_or_not_template:
+        name = request.POST.get("name", "")
+        desc = request.POST.get("description", "")
+        filename = get_replay_storage().get_available_name(
+            "%(name)s.replay" % {"name": name}, 120
+        )
+        path = get_replay_storage().path(filename)
+        instance.proxy.create_replay(name, path, desc)
+        msg = _("Create replay: %(rep)s") % {"rep": name}
+        addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
+    return redirect(request.META.get("HTTP_REFERER") + "#managereplay")
+
+
+def delete_replay(request, pk):
+    instance = get_instance(request.user, pk)
+    allow_admin_or_not_template = (
+        request.user.is_superuser or request.user.is_staff or not instance.is_template
+    )
+    if allow_admin_or_not_template:
+        rep_name = request.POST.get("name", "")
+        instance.proxy.replay_delete(rep_name)
+        msg = _("Delete replay: %(rep)s") % {"rep": rep_name}
+        addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
+    return redirect(request.META.get("HTTP_REFERER") + "#managereplay")
+
+
+def start_replay(request, pk):
+    instance = get_instance(request.user, pk)
+    allow_admin_or_not_template = (
+        request.user.is_superuser or request.user.is_staff or not instance.is_template
+    )
+    if allow_admin_or_not_template:
+        rep_name = request.POST.get("name", "")
+        instance.proxy.replay_start(rep_name)
+        msg = _("Successful start replay: ")
+        msg += rep_name
+        messages.success(request, msg)
+        msg = _("Start replay: %(rep)s") % {"rep": rep_name}
+        addlogmsg(request.user.username, instance.compute.name, instance.name, msg)
+    return redirect(request.META.get("HTTP_REFERER") + "#managereplay")
 
 
 @superuser_only

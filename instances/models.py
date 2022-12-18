@@ -174,6 +174,10 @@ class Instance(models.Model):
         return sorted(self.proxy.get_snapshot(), reverse=True, key=lambda k: k["date"])
 
     @cached_property
+    def replays(self):
+        return sorted(self.proxy.get_replay(), reverse=True, key=lambda k: k["date"])
+
+    @cached_property
     def inst_xml(self):
         return self.proxy._XMLDesc(VIR_DOMAIN_XML_SECURE)
 
