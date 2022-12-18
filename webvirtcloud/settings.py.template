@@ -310,3 +310,7 @@ LDAP_SEARCH_GROUP_FILTER_USERS = ''
 
 ## The user name prefix to identify the user name (e.g. cn)
 LDAP_USER_UID_PREFIX = ''
+
+
+# Directory for replay files
+REPLAY_ROOT = Path.joinpath(BASE_DIR, "replays")
